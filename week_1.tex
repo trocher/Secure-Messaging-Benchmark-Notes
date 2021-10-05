@@ -1,0 +1,68 @@
+%!TEX root = main.tex
+
+\section{Benchmarking at the device level}
+
+Note that the content of this section is mostly taken from the paper introducing Rancid \cite{Rancid}.\\
+Several tools for performing benchmarking in Java exists \cite{caliper} \cite{JMH}, however most of them are not designed for the Android platform since Android has its very own way to handles Java code execution. Indeed, Android uses a combination of ahead-of-time and just-in-time combination \cite{Rancid}.
+When performing benchmark in general, two errors factors must be taken in consideration :
+\begin{itemize}
+    \item Random noise, It reduces the precision (and hence the confidence of the measures) it can hence be reduced through repetition and statistical methods.\newline
+    Some of these noise sources are OS process scheduling, memory latency, or CPU branch predictors and pipeline stalls. \cite{Rancid}
+    \item Systematic error sources, It impacts all the measures in the same way, and hence is usually hard to find. Some examples are compiler optimization levels or debugging support. \cite{Rancid}
+\end{itemize}
+In the following, we will present the main causes of incertitude during benchmarking.
+\subsection{Error causes}
+\subsubsection{Processor Frequency}
+In Linux, CPU and GPU frequencies are controlled by governors \cite{governor}. Depending on factors as power constraints or temperature, the frequencies can vary a lot and invalidate a benchmark if such behavior is not taken into consideration. To be able to control the governors and set for examples the processors to their maximal frequency, in most of the cases, one must have root access to the device \cite{Rancid}.
+
+\subsubsection{Temperature}
+When the temperature of the devices go beyond a certain threshold, the device will perform thermal throttling and might reduce the processor frequency or even shut down certain core to lower its internal temperature \cite{thermal}. A solution to this problem is to control the temperature by ourself and for example wait for the device to cool down between each benchmarks run \cite{Rancid}
+
+\subsubsection{Processor Affinity}
+Modern devices are often based on Arm big.LITTLE multi-core CPU which consists of two types of processors. The first ones are high-performance when the other ones are low-performance high-efficiency \cite{Arm}. To obtain a proper benchmark, one would need to force the device to switch to the high-performances cores, either by using the \texttt{sched\_setaffinity} Linux system call \cite{schedsetaffinity} or by adding an warm-up execution execution before the benchmark to make the device switch by itself. The later solution could cause a temperature rise and might not be a good solution however. \cite{Rancid}.
+
+\subsubsection{Background processes}
+Android's background processes and activities tends to add overhead for example thought network communication. To lower this noise, it would be good to uninstall all unessential apps and to use the airplane mode. For process from services or app that cannot be uninstalled, it is possible to kill them temporarily. \cite{Rancid}
+
+\subsubsection{Other settings to take into consideration}
+The Section IV.C of Rancid Paper \cite{Rancid} also provides useful consideration to have in mind when benchmarking on mobile phones.
+
+\subsubsection{Rancid}
+
+\subsection{Metrics}
+\begin{itemize}
+    \item Runtime
+    \item Battery usage
+    \item CPU utilization
+    \item Stored Sate size
+\end{itemize}
+See \url{https://eprint.iacr.org/2019/965.pdf}
+
+\subsection{Settings}
+\begin{itemize}
+    \item Unbalanced message flow
+\end{itemize}
+
+\section{Benchmarking at the network level}
+\subsection{Settings}
+At the network level, we could artificially induce different hazard on the network using for example qdisc \cite{qdisc} in order to try to reproduce real world conditions such as:
+\begin{itemize}
+    \item Network delays
+    \item Message drops
+    \item Un-ordered of packets
+\end{itemize}
+This settings could be set on a server between the devices that runs the protocol in order to simulate different messaging condition (low bandwidth connection, long distances between the users...).
+\subsection{Metrics}
+\begin{itemize}
+    \item Size of updates
+    \item Throughput and Goodput
+\end{itemize}
+
+\section{Implementing the differents protocols}
+Scientifics papers that treat the subject are very rare.
+A solution would be first to create a light Signal like app that would take as a dependency cryptography library that provide an interface comparable to lib-signal (https://github.com/signalapp/libsignal-protocol-java). 
+
+\section{Real conversation dataset}
+
+\subsection{NUS}
+The National University of Singapore SMS Corpus \cite{NUS,Chen2013} provides a dataset of 67,093 SMS. The messages largely originate from Singaporeans and mostly from students attending the University.
